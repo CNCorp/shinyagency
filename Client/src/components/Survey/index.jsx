@@ -4,6 +4,8 @@ import styled from "styled-components";
 
 import { Loader } from "../../utils/Atoms";
 import { SurveyContext, ThemeContext } from "../../utils/context";
+import { useFetch } from "../../utils/hooks";
+import Results from "./results";
 
 const StyledLink = styled(Link)`
   padding: 0.4rem 1rem;
@@ -55,7 +57,8 @@ const QWrapper = styled.div`
 const ReplyBox = styled.button`
   border: none;
   height: 50px;
-  width: 250px;
+  max-width: 250px;
+  width: 42vw;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -64,18 +67,22 @@ const ReplyBox = styled.button`
   cursor: pointer;
   box-shadow: ${({ isSelected }) =>
     isSelected ? `0px 0px 0px 3px deeppink inset` : "none"};
-  &:first-child {
-    margin-right: 15px;
-  }
-  &:last-of-type {
-    margin-left: 15px;
-  }
 `;
 
 const ReplyWrapper = styled.div`
   display: flex;
   flex-direction: row;
+  justify-content: center;
   margin: 30px 0;
+  width: 100%;
+  & a {
+    &:first-child {
+      margin-right: 15px;
+    }
+    &:last-of-type {
+      margin-left: 15px;
+    }
+  }
 `;
 
 const Survey = () => {
@@ -85,42 +92,20 @@ const Survey = () => {
   const prevQuestionNumber =
     questionNumberInt === 1 ? 1 : questionNumberInt - 1;
 
-  const [isDataLoading, setDataLoading] = useState(false);
-  const [surveyData, setSurveyData] = useState([]);
-  const [error, setError] = useState(false);
-
   const { answers, saveAnswers } = useContext(SurveyContext);
-
-  useEffect(() => {
-    async function fetchSurvey() {
-      setDataLoading(true);
-      try {
-        const res = await fetch(`http://localhost:8000/survey`);
-        const { surveyData } = await res.json();
-        setSurveyData(surveyData);
-      } catch (err) {
-        console.log(err);
-        setError(true);
-        alert(err);
-      } finally {
-        setDataLoading(false);
-      }
-    }
-    fetchSurvey();
-  }, []);
+  const { data, isLoading, error } = useFetch(`http://localhost:8000/survey`);
+  const { surveyData } = data;
 
   function saveReply(answer) {
     saveAnswers({ [questionNumber]: answer });
   }
 
-  if (questionNumber === "results") console.log(answers);
-
-  if (error) return <h1>😅 Something went wrong 😅</h1>;
+  if (error) return <h1>😅 Something went wrong 🤭</h1>;
 
   return (
     <section>
       <h1>Survey 🧩</h1>
-      {!isDataLoading && (
+      {!isLoading && surveyData && (
         <div>
           <StyledLink
             to={questionNumber > 1 && `/survey/${prevQuestionNumber}`}
@@ -143,40 +128,40 @@ const Survey = () => {
 
       <QWrapper>
         <h2>{questionNumberInt ? `Question ${questionNumber}` : "Results"}</h2>
-        {isDataLoading ? <Loader /> : <p>{surveyData[questionNumberInt]}</p>}
-        {questionNumber === "results" &&
-          (isDataLoading ? (
-            <Loader />
-          ) : (
-            <ul>
-              {Object.keys(answers).map((questionNumber) => (
-                <li key={questionNumber}>
-                  <p>
-                    Question {questionNumber} :{" "}
-                    {answers[questionNumber] ? "oui" : "non"}
-                  </p>
-                  <span className="resultsQuestion">
-                    {surveyData[questionNumber]}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          ))}
+        {questionNumber !== "results" &&
+          (isLoading ? <Loader /> : <p>{surveyData[questionNumberInt]}</p>)}
+        {questionNumber === "results" && <Results answers={answers} />}
       </QWrapper>
-      {questionNumberInt ? (
+      {questionNumberInt && surveyData ? (
         <ReplyWrapper>
-          <ReplyBox
-            onClick={() => saveReply(true)}
-            isSelected={answers[questionNumber] === true}
+          <Link
+            to={
+              surveyData[questionNumberInt + 1]
+                ? `/survey/${nextQuestionNumber}`
+                : "/survey/results"
+            }
           >
-            👍
-          </ReplyBox>
-          <ReplyBox
-            onClick={() => saveReply(false)}
-            isSelected={answers[questionNumber] === false}
+            <ReplyBox
+              onClick={() => saveReply(true)}
+              isSelected={answers[questionNumber] === true}
+            >
+              👍
+            </ReplyBox>
+          </Link>
+          <Link
+            to={
+              surveyData[questionNumberInt + 1]
+                ? `/survey/${nextQuestionNumber}`
+                : "/survey/results"
+            }
           >
-            👎
-          </ReplyBox>
+            <ReplyBox
+              onClick={() => saveReply(false)}
+              isSelected={answers[questionNumber] === false}
+            >
+              👎
+            </ReplyBox>
+          </Link>
         </ReplyWrapper>
       ) : null}
     </section>

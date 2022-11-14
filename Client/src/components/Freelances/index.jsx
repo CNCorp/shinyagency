@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
 import { Loader } from "../../utils/Atoms";
 import Card from "./card";
 import styled from "styled-components";
+import { useFetch } from "../../utils/hooks";
 
 const DataContainer = styled.div`
   display: grid;
@@ -10,34 +10,22 @@ const DataContainer = styled.div`
 `;
 
 const Freelances = () => {
-  const [freelances, setFreelances] = useState([]);
-  const [isDataLoading, setDataLoading] = useState(false);
+  const { data, isLoading, error } = useFetch(
+    "http://localhost:8000/freelances"
+  );
 
-  useEffect(() => {
-    async function fetchFreelances() {
-      setDataLoading(true);
-      try {
-        const res = await fetch(`http://localhost:8000/freelances`);
-        const { freelancersList } = await res.json();
-        setFreelances(freelancersList);
-      } catch (err) {
-        console.log(err);
-        alert(err);
-      } finally {
-        setDataLoading(false);
-      }
-    }
-    fetchFreelances();
-  }, []);
+  const { freelancersList } = data;
+
+  if (error) return <h3>🤭 Oops something went wrong 😅</h3>;
 
   return (
     <section>
       <h1>Freelances 🧑‍💻</h1>
       <DataContainer>
-        {isDataLoading ? (
+        {isLoading ? (
           <Loader />
         ) : (
-          freelances.map((profile, index) => (
+          freelancersList.map((profile, index) => (
             <Card
               key={index}
               label={profile.job}
