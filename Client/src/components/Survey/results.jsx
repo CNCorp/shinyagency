@@ -18,7 +18,7 @@ const ResultTitle = styled.h3`
   margin: 2rem auto;
 `;
 
-const formatQueryParams = (a) => {
+export const formatQueryParams = (a) => {
   const answerNumbers = Object.keys(a);
   return answerNumbers.reduce((previousParams, answerNumber, index) => {
     const isFirstAnswer = index === 0;
@@ -26,6 +26,14 @@ const formatQueryParams = (a) => {
     return `${previousParams}${separator}a${answerNumber}=${a[answerNumber]}`;
   }, "");
 };
+
+export function formatJobList(title, listLength, index) {
+  if (index === listLength - 1) {
+    return title;
+  }
+  // on ajoute un + sauf si dernier élément
+  return `${title} + `;
+}
 
 export default function Results() {
   const { answers } = useContext(SurveyContext);
@@ -37,6 +45,8 @@ export default function Results() {
 
   const { resultsData } = data;
 
+  console.log(resultsData);
+
   if (isLoading) return <Loader />;
   if (error) return <h3>😅 Une erreur est survenue 🤭</h3>;
 
@@ -45,8 +55,10 @@ export default function Results() {
       <>
         <ResultTitle>
           Les compétences dont vous avez besoin :{" "}
-          {resultsData.map((comp) => (
-            <CompTitle>{comp.title} &nbsp;</CompTitle>
+          {resultsData.map((comp, index) => (
+            <CompTitle key={`comp-title-${index}-${comp.title}`}>
+              {formatJobList(comp.title, resultsData.length, index)}
+            </CompTitle>
           ))}{" "}
         </ResultTitle>
         <div>

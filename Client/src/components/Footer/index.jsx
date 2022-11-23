@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import ToggleThemeButton from "../utils/context/toggleTheme";
+import ToggleThemeButton from "../../utils/context/toggleTheme";
 
 const FooterContainer = styled.footer`
   display: flex;

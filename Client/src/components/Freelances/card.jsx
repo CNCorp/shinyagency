@@ -1,3 +1,4 @@
+import { useState } from "react";
 import styled from "styled-components";
 import defaultPicture from "../../assets/DSC08941.jpg";
 
@@ -9,9 +10,10 @@ const CardDiv = styled.div`
   justify-content: center;
   width: 150px;
   height: 150px;
-  background-color: aquamarine;
+  background-color: ${(props) => (props.isFavorite ? "yellow" : "aquamarine")};
   border-radius: 100%;
   margin: 1rem;
+  transition: all 0.2s ease-in-out;
   & img {
     object-fit: cover;
     border-radius: 100%;
@@ -35,20 +37,31 @@ const CardDiv = styled.div`
     text-transform: uppercase;
     font-weight: bold;
     padding: 0.2rem 0.5rem;
-    background-color: aquamarine;
+    background-color: ${(props) =>
+      props.isFavorite ? "yellow" : "aquamarine"};
     color: white;
     text-shadow: 0 0 0.5rem #0000005b;
     border-radius: 1rem;
     white-space: nowrap;
+    transition: all 0.2s ease-in-out;
   }
 `;
 
 const Card = ({ label, title, picture = defaultPicture }) => {
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  const starTitle = (title, isFavorite) =>
+    isFavorite ? `⭐ ${title} ⭐` : title;
+
   return (
-    <CardDiv>
+    <CardDiv
+      isFavorite={isFavorite}
+      onClick={() => setIsFavorite(!isFavorite)}
+      data-testid="CardContainer"
+    >
       <span className="job">{label}</span>
       <img src={picture} alt="freelance" />
-      <span className="title">{title}</span>
+      <span className="title">{starTitle(title, isFavorite)}</span>
     </CardDiv>
   );
 };

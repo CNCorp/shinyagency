@@ -20,4 +20,5 @@ export const Loader = styled.div`
   animation: ${rotate} 1s infinite linear;
   height: 0;
   width: 0;
+  margin: 2rem auto;
 `;
